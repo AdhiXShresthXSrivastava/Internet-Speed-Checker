@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultra Internet Speed Checker</title>
+<style>
+  /* Reset and base */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: #e0eafc;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  h1 {
+    font-weight: 900;
+    font-size: 3rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    text-align: center;
+    color: #86a8e7;
+    text-shadow: 0 0 8px #5a82c7;
+  }
+  .subtitle {
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #aecbff;
+    font-size: 1.3rem;
+    font-style: italic;
+    text-shadow: 0 0 6px #4070f4;
+  }
+  .speed-checker {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 35px;
+    padding: 2.5rem 3rem;
+    max-width: 520px;
+    width: 100%;
+    box-shadow:
+      0 0 10px #60e1ff88,
+      inset 0 0 10px #60e1ffaa;
+    backdrop-filter: blur(12px);
+    border: 2px solid #60e1ff55;
+    transition: border-color 0.3s ease;
+  }
+  .speed-checker:hover {
+    border-color: #60e1ffcc;
+    box-shadow:
+      0 0 20px #60e1ffcc,
+      inset 0 0 20px #60e1ffdd;
+  }
+  .results {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+    gap: 14px;
+  }
+  .result-box {
+    background: linear-gradient(135deg, #1e2a38, #27435c);
+    border-radius: 25px;
+    padding: 1.25rem 1.75rem;
+    text-align: center;
+    width: 34%;
+    box-shadow:
+      0 4px 12px #125aeeaa,
+      inset 0 -6px 15px #1f2f48;
+    transition: background 0.3s ease, transform 0.3s ease;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .result-box:hover {
+    background: linear-gradient(135deg, #2c3e5a, #3c5a8d);
+    transform: scale(1.05);
+    box-shadow:
+      0 6px 18px #60e1ffcc,
+      inset 0 -8px 20px #2a456a;
+  }
+  .result-box h2 {
+    font-size: 2.8rem;
+    margin: 0 0 0.4rem 0;
+    color: #60e1ff;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px #5abfff;
+    user-select: text;
+    line-height: 1.1;
+  }
+  .result-box p {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 0;
+    letter-spacing: 0.05em;
+    color: #9be7ff;
+    text-shadow: 0 0 4px #4ea5db;
+    white-space: nowrap;
+  }
+  button {
+    display: block;
+    margin: 0 auto;
+    padding: 1rem 4rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #45a1ff, #23c9ff);
+    color: #00253a;
+    box-shadow:
+      0 4px 15px rgba(35, 201, 255, 0.8),
+      inset 0 -3px 6px rgba(0, 143, 255, 0.7);
+    transition:
+      background 0.3s ease,
+      transform 0.2s ease,
+      box-shadow 0.3s ease;
+    user-select: none;
+  }
+  button:disabled {
+    background: #88d8ffaa;
+    box-shadow: none;
+    cursor: not-allowed;
+    color: #004f7a;
+  }
+  button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #23c9ff, #45a1ff);
+    transform: scale(1.08);
+    box-shadow:
+      0 6px 25px rgba(35, 201, 255, 1),
+      inset 0 -4px 8px rgba(0, 143, 255, 0.8);
+  }
+  .progress-ring {
+    display: block;
+    margin: 2rem auto 1.75rem auto;
+    width: 160px;
+    height: 160px;
+    filter: drop-shadow(0 0 8px #60e1ffcc);
+  }
+  .progress-ring circle {
+    fill: transparent;
+    stroke-width: 14;
+    stroke-linecap: round;
+  }
+  .progress-ring .progress-bg {
+    stroke: rgba(255 255 255 / 0.15);
+  }
+  .progress-ring .progress-bar {
+    stroke: #60e1ff;
+    stroke-dasharray: 326.7256;
+    stroke-dashoffset: 326.7256;
+    transition: stroke-dashoffset 0.3s ease;
+    filter: drop-shadow(0 0 5px #60e1ffbb);
+  }
+  .status-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 1.25rem;
+    color: #8ac7ff;
+    height: 1.6rem;
+    text-shadow: 0 0 6px #4797ffcc;
+    user-select: none;
+  }
+  /* Responsive */
+  @media (max-width: 640px) {
+    .speed-checker {
+      max-width: 95vw;
+      padding: 2rem 1.5rem;
+    }
+    .results {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .result-box {
+      width: 48%;
+      padding: 1rem 1.25rem;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 2.4rem;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+    }
+    button {
+      width: 100%;
+      font-size: 1.2rem;
+      padding: 0.9rem 0;
+      border-radius: 35px;
+    }
+    .progress-ring {
+      width: 140px;
+      height: 140px;
+      margin: 1.8rem auto 1.5rem auto;
+    }
+  }
+  @media (max-width: 400px) {
+    .result-box {
+      width: 100%;
+      padding: 1rem 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+<h1>Ultra Internet Speed Checker</h1>
+<div class="subtitle">Test your connection speed instantly</div>
+
+<div class="speed-checker" role="main" aria-label="Internet speed checker tester">
+  <svg class="progress-ring" width="160" height="160" viewBox="0 0 140 140" aria-hidden="true" focusable="false">
+    <circle class="progress-bg" stroke-width="14" cx="70" cy="70" r="52"></circle>
+    <circle class="progress-bar" stroke-width="14" cx="70" cy="70" r="52"></circle>
+  </svg>
+  <div class="status-text" id="statusText" aria-live="polite" aria-atomic="true">Click START to begin test</div>
+  <div class="results">
+    <div class="result-box" role="region" aria-label="Ping result">
+      <h2 id="pingResult" tabindex="0" aria-live="polite" aria-atomic="true">-</h2>
+      <p>Ping</p>
+    </div>
+    <div class="result-box" role="region" aria-label="Download speed result">
+      <h2 id="downloadResult" tabindex="0" aria-live="polite" aria-atomic="true">-</h2>
+      <p>Download</p>
+    </div>
+    <div class="result-box" role="region" aria-label="Upload speed result">
+      <h2 id="uploadResult" tabindex="0" aria-live="polite" aria-atomic="true">-</h2>
+      <p>Upload</p>
+    </div>
+  </div>
+  <button id="startButton" aria-label="Start speed test">Start Test</button>
+</div>
+
+<script>
+  (() => {
+    const startBtn = document.getElementById('startButton');
+    const pingResult = document.getElementById('pingResult');
+    const downloadResult = document.getElementById('downloadResult');
+    const uploadResult = document.getElementById('uploadResult');
+    const statusText = document.getElementById('statusText');
+
+    const progressBar = document.querySelector('.progress-bar');
+    const radius = progressBar.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    progressBar.style.strokeDasharray = circumference + ' ' + circumference;
+    progressBar.style.strokeDashoffset = circumference;
+
+    function setProgress(percent) {
+      const offset = circumference - (percent / 100) * circumference;
+      progressBar.style.strokeDashoffset = offset;
+    }
+
+    // CORS-enabled test file from GitHub (~4.3MB)
+    const testFileUrl = 'https://raw.githubusercontent.com/dwyl/english-words/master/words.txt';
+
+    async function measurePing() {
+      const pingTestUrl = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png';
+      const attempts = 5;
+      let totalTime = 0;
+      for (let i = 0; i < attempts; i++) {
+        const start = performance.now();
+        try {
+          await fetch(pingTestUrl, { mode: 'no-cors', cache: 'no-cache' });
+        } catch (e) { }
+        const end = performance.now();
+        totalTime += end - start;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return totalTime / attempts;
+    }
+
+    async function measureDownloadSpeed(onProgress) {
+      try {
+        const response = await fetch(testFileUrl, { cache: 'no-cache' });
+        if (!response.ok) throw new Error('Network response not ok');
+
+        const contentLength = response.headers.get('content-length');
+        if (!contentLength) throw new Error('Content-Length response header unavailable');
+
+        const total = parseInt(contentLength, 10);
+        let loaded = 0;
+        const reader = response.body.getReader();
+
+        const startTime = performance.now();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          loaded += value.length;
+          onProgress(Math.min((loaded / total) * 100, 100));
+        }
+
+        const duration = (performance.now() - startTime) / 1000;
+        const bitsLoaded = loaded * 8;
+        const speedMbps = (bitsLoaded / duration / 1024 / 1024).toFixed(2);
+        return speedMbps;
+      } catch (e) {
+        throw new Error('Download error: ' + e.message);
+      }
+    }
+
+    async function measureUploadSpeed() {
+      const uploadTestUrl = 'https://httpbin.org/post';
+      const dataSizeMB = 5;
+      const dataSizeBytes = dataSizeMB * 1024 * 1024;
+      const blob = new Blob([new Uint8Array(dataSizeBytes)], { type: 'application/octet-stream' });
+
+      const startTime = performance.now();
+      try {
+        const response = await fetch(uploadTestUrl, {
+          method: 'POST',
+          body: blob,
+          mode: 'cors',
+        });
+        if (!response.ok) throw new Error('Upload failed');
+      } catch (e) {
+      }
+      const duration = (performance.now() - startTime) / 1000;
+      const bitsUploaded = dataSizeBytes * 8;
+      const speedMbps = (bitsUploaded / duration / 1024 / 1024).toFixed(2);
+      return speedMbps;
+    }
+
+    async function runSpeedTest() {
+      startBtn.disabled = true;
+      pingResult.textContent = '-';
+      downloadResult.textContent = '-';
+      uploadResult.textContent = '-';
+      statusText.textContent = 'Measuring ping...';
+      setProgress(0);
+
+      try {
+        let ping = await measurePing();
+        ping = ping.toFixed(0);
+        pingResult.textContent = ping;
+
+        statusText.textContent = 'Testing download speed...';
+        const downloadSpeed = await measureDownloadSpeed((prog) => {
+          setProgress(prog * 0.6);
+        });
+        downloadResult.textContent = downloadSpeed;
+
+        statusText.textContent = 'Testing upload speed...';
+        const uploadSpeed = await measureUploadSpeed();
+        uploadResult.textContent = uploadSpeed;
+
+        setProgress(100);
+        statusText.textContent = 'Test complete!';
+      } catch (err) {
+        statusText.textContent = 'Test failed: ' + err.message;
+        setProgress(0);
+      } finally {
+        startBtn.disabled = false;
+      }
+    }
+
+    startBtn.addEventListener('click', runSpeedTest);
+  })();
+</script>
+</body>
+</html>
